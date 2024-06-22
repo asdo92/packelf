@@ -102,7 +102,7 @@ unpack() {
         if [ -n "$PACKELF_TMP_DIR" ]; then
             unpack_dir="$PACKELF_TMP_DIR"
         else
-            tmp_parent=/tmp/packelf_tmp
+            tmp_parent=/tmp
             mkdir -p "$tmp_parent"
             unpack_dir=$(mktemp -d -p "$tmp_parent" || echo "$tmp_parent")
         fi
