@@ -72,17 +72,21 @@ pack() {
         -e 's/^program=[^ ]*$/program='"$program"'/' \
         -e 's/^ld_so=[^ ]*$/ld_so='"$ld_so"'/' \
         >"$dst"
-
-    tar $compress_flag -ch \
-        --transform 's@.*/@'"$program"'.res/@' \
-        "$src" $libs "$@" \
-        >>"$dst" #\
-        #2> >(grep -v 'Removing leading' >&2) # bash extension
+    
+    echo "Creating static executable $dst from $src"
+    for libraries in ${libs} ; do
+      echo "Linking library ${libraries}"
+    done
+    echo "Creating executable linker"
+    echo "Building static executable in $dst" 
+    tar $compress_flag -ch --transform 's@.*/@'"$program"'.res/@' "$src" $libs "$@" >>"$dst"
 
     chmod +x "$dst"
-    echo "'$src' was packed to '$dst'"
+    echo "Created successfully"
+    #echo "'$src' was packed to '$dst'"
+    echo ""
     echo "$dst" | grep -q / || dst="./$dst"
-    echo "Just run '$dst ARGS...' to execute the command."
+    echo "Just run '$dst <ARGS>' to execute the command."
     echo "Or run 'PACKELF_UNPACK_DIR=xxx $dst' to unpack it only."
 }
 
