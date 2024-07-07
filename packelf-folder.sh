@@ -43,7 +43,7 @@ pack() {
   echo "Creating package $2"
   unpack $filename $executable_run
   cd $folder
-  chmod 777 -R * 2> /dev/null
+  #chmod 777 -R * 2> /dev/null
   tar $compress_flag -c -f $temp_file *
   cd ${current_dir}
   cat $temp_file >> $filename
