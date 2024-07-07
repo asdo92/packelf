@@ -3,141 +3,92 @@
 set -e
 
 # These vars will be modified automatically with sed
-run_mode=packer
 compress_flag=-z
-program=
-ld_so=
 
-load() {
-    script_path="$0"
-
-    while link_path=$(readlink "$script_path"); do
-        script_path="$link_path"
-    done
-
-    unpack_dir=$(dirname "$script_path")
-
-    exec "$unpack_dir/$program.res/$ld_so" \
-        --library-path "$unpack_dir/$program.res" \
-        "$unpack_dir/$program.res/$program" "$@"
-    # unreachable
-}
-
-if [ "$run_mode" = loader ]; then
-    load "$@"
-fi
-
-pack_help() {
-    echo "$0 <ELF_SRC_PATH> <DST_PATH> [ADDITIONAL_LIBS]"
+unpack() {
+  filename=$1
+  echo "#!/usr/bin/env sh" > $filename
+  echo "#set -o pipefail # bash extension" >> $filename
+  echo "set -e" >> $filename
+  echo "" >> $filename
+  echo "compress_flag=$compress_flag" >> $filename
+  echo "executable_run=$2" >> $filename
+  echo "tmp_parent=/tmp" >> $filename
+  echo 'if [ "$1" = "--packelf-extract" ] ; then' >> $filename
+  echo '  mkdir -p packelf-files' >> $filename 
+  echo "  echo \"Extracting to 'packelf-files'\"" >> $filename 
+  echo "  sed '1,/^#__END__\$/d' \"\$0\" | tar \$compress_flag -x -C packelf-files" >> $filename
+  echo "  exit 0" >> $filename 
+  echo "fi" >> $filename 
+  echo 'mkdir -p "$tmp_parent"' >> $filename
+  echo 'unpack_dir=$(mktemp -d -p "$tmp_parent" || echo "$tmp_parent")' >> $filename
+  echo "sed '1,/^#__END__\$/d' \"\$0\" | tar \$compress_flag -x -C \"\$unpack_dir\"" >> $filename
+  echo "chmod 777 -R \"\$unpack_dir\"/* 2> /dev/null" >> $filename
+  echo '"$unpack_dir/$executable_run" "$@"' >> $filename
+  echo "rm -rf \$unpack_dir" >> $filename
+  echo "exit 0" >> $filename
+  echo "#__END__" >> $filename
 }
 
 pack() {
-    [ $# -ge 2 ] || {
-        pack_help
-        exit 1
-    }
+  folder=$1
+  filename=$2
+  executable_run=$3
+  temp_file=$(mktemp)
+  current_dir=$(pwd)
+  if [ ! -d "$folder" ] ; then
+    echo "Folder $folder does not exist"
+    exit 0
+  fi 
+  #echo "Creating executable $2"
+  unpack $filename $executable_run
+  cd $folder
+  chmod 777 -R * 2> /dev/null
+  tar $compress_flag -c -f $temp_file *
+  cd ${current_dir}
+  cat $temp_file >> $filename
+  rm -rf $temp_file
+  echo "Created successfully"
+}
 
-    case $1 in
-        -h|--help)
-            pack_help
-            exit 0
-        ;;
-        *)
-        ;;
-    esac
+help() {
+  echo "$0 <ELF_SRC_PATH> <DST_PATH>"
+  exit 0
+}
 
-    src="$1"
-    shift
-    dst="$1"
-    shift
-
-    libs="$(ldd "$src" | grep -F '/' | sed -E 's|[^/]*/([^ ]+).*?|/\1|')"
+if [ ! -z "$1" ] ; then
+  if [ ! -f "$1" ] ; then
+    echo "$0: File $1 does not exist"
+    exit 1
+  else
+    libs="$(ldd "$1" | grep -F '/' | sed -E 's|[^/]*/([^ ]+).*?|/\1|')"
     ld_so="$(echo "$libs" | grep -F '/ld-linux-' || echo "$libs" | grep -F '/ld-musl-' || echo "$libs" | grep -F '/ld.so')"
     ld_so="$(basename "$ld_so")"
-    program="$(basename "$src")"
-
-    cat "$0" | sed -E \
-        -e 's/^run_mode=[^ ]*$/run_mode=unpacker/' \
-        -e 's/^compress_flag=[^ ]*$/compress_flag='"$compress_flag"'/' \
-        -e 's/^program=[^ ]*$/program='"$program"'/' \
-        -e 's/^ld_so=[^ ]*$/ld_so='"$ld_so"'/' \
-        >"$dst"
-    
-    echo "Creating static executable $dst from $src"
-    for libraries in ${libs} ; do
-      echo "Linking library ${libraries}"
-    done
-    echo "Creating executable linker"
-    echo "Building static executable in $dst" 
-    tar $compress_flag -ch --transform 's@.*/@'"$program"'.res/@' "$src" $libs "$@" >>"$dst"
-
-    chmod +x "$dst"
-    echo "Created successfully"
-    #echo "'$src' was packed to '$dst'"
-    echo ""
-    echo "$dst" | grep -q / || dst="./$dst"
-    echo "Just run '$dst <ARGS>' to execute the command."
-    echo "Or run 'PACKELF_UNPACK_DIR=xxx $dst' to unpack it only."
-}
-
-unpack() {
-    if [ -n "$PACKELF_UNPACK_DIR" ]; then
-        [ -d "$PACKELF_UNPACK_DIR" ] || {
-            echo "'$PACKELF_UNPACK_DIR' is not a dir."
-            exit 1
-        }
-        [ -e "$PACKELF_UNPACK_DIR/$program" ] && {
-            echo "'$PACKELF_UNPACK_DIR/$program' already exists, please remove it first."
-            exit 1
-        }
-        unpack_dir="$PACKELF_UNPACK_DIR"
-
-    else
-        if [ -n "$PACKELF_TMP_DIR" ]; then
-            unpack_dir="$PACKELF_TMP_DIR"
-        else
-            tmp_parent=/tmp
-            mkdir -p "$tmp_parent"
-            unpack_dir=$(mktemp -d -p "$tmp_parent" || echo "$tmp_parent")
-        fi
-
-        trap 'rm -rf "$unpack_dir"' 0 1 2 3 6 10 12 13 14 15
+    program="$(basename "$1")"
+    if [ -z "$libs" ] ; then
+      echo "$0: Not a dynamic executable"
+      exit 1
     fi
-
-    check_path="$unpack_dir/__check_permission__"
-    if ! (echo > "$check_path" && chmod +x "$check_path" && [ -x "$check_path" ]); then
-        rm -rf "$unpack_dir"
-        tmp_parent="$(pwd)/packelf_tmp"
-        mkdir -p "$tmp_parent"
-        unpack_dir="$(mktemp -d -p "$tmp_parent"  || echo "$tmp_parent")"
-    fi
-
-    sed '1,/^#__END__$/d' "$0" | tar $compress_flag -x -C "$unpack_dir"
-    sed -i 's@/etc/ld.so.preload@/etc/___so.preload@g' "$unpack_dir/$program.res/$ld_so"
-
-    if [ -n "$PACKELF_UNPACK_DIR" ]; then
-        sed '/^#__END__$/,$d' "$0" > "$unpack_dir/$program"
-        sed -i -E 's/^run_mode=\w*$/run_mode=loader/' "$unpack_dir/$program"
-        chmod +x "$unpack_dir/$program"
-        rm -f "$check_path"
-        echo "'$program' was unpacked to '$unpack_dir'."
-        echo "$unpack_dir" | grep -q / || unpack_dir="./$unpack_dir"
-        echo "You can run '$unpack_dir/$program ARGS...' to execute the command."
-
-    else
-        "$unpack_dir/$program.res/$ld_so" \
-            --library-path "$unpack_dir/$program.res" \
-            "$unpack_dir/$program.res/$program" "$@"
-        exit $?
-    fi
-}
-
-
-if [ "$run_mode" = unpacker ]; then
-    unpack "$@"
+  fi
 else
-    pack "$@"
+  help
+  exit 0
 fi
 
-exit 0
-#__END__
+if [ -z "$2" ] ; then
+  help
+else
+  temp_dir=$(mktemp -d)
+  echo "Creating static binary ${2} from ${1}"
+  echo "Linking libraries"
+  cp -L ${1} ${temp_dir}/ 
+  for libraries in ${libs} ; do
+    cp -L ${libraries} ${temp_dir}/
+  done
+  echo "#!/usr/bin/env sh" > ${temp_dir}/AppRun
+  echo "" >> ${temp_dir}/AppRun
+  echo "\$(dirname \$0)/${ld_so} --library-path \$(dirname \$0) \$(dirname \$0)/${program} \"\$@\"" >> ${temp_dir}/AppRun
+  chmod 777 -R "$temp_dir"
+  pack "$temp_dir" "$2" AppRun
+fi
+
