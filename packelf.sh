@@ -28,9 +28,7 @@ if [ "$run_mode" = loader ]; then
 fi
 
 pack_help() {
-    echo "Usage: $0 [-zjJn] <ELF_SRC_PATH> <DST_PATH> [ADDITIONAL_LIBS ...]"
-    echo "      -zjJ    compress flag passed to tar, '-z' by default"
-    echo "      -n      pack without compress"
+    echo "$0 <ELF_SRC_PATH> <DST_PATH> [ADDITIONAL_LIBS]"
 }
 
 pack() {
@@ -40,14 +38,6 @@ pack() {
     }
 
     case $1 in
-        -z|-j|-J)
-            compress_flag=$1
-            shift
-        ;;
-        -n)
-            compress_flag=''
-            shift
-        ;;
         -h|--help)
             pack_help
             exit 0
