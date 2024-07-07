@@ -39,7 +39,5 @@ Usage: ./packelf-folder.sh <FOLDER> <FILENAME> <EXECUTABLE_RUN>
 * sed
 * grep
 * chmod
-* readlink
 * ldd (only needed for packing, not needed for executing or unpacking)
 
-Note: If your tar doesn't support gzip, '-n' is needed when you pack a program.
