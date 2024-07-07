@@ -17,9 +17,8 @@ unpack() {
   echo 'mkdir -p "$tmp_parent"' >> $filename
   echo 'unpack_dir=$(mktemp -d -p "$tmp_parent" || echo "$tmp_parent")' >> $filename
   echo "sed '1,/^#__END__\$/d' \"\$0\" | tar \$compress_flag -x -C \"\$unpack_dir\"" >> $filename
-  echo "cd \$unpack_dir" >> $filename
-  echo "chmod 777 -R * 2> /dev/null" >> $filename
-  echo './$executable_run "$@"' >> $filename
+  echo "chmod 777 -R \"\$unpack_dir\"/* 2> /dev/null" >> $filename
+  echo '"$unpack_dir/$executable_run" "$@"' >> $filename
   echo "rm -rf \$unpack_dir" >> $filename
   echo "exit 0" >> $filename
   echo "#__END__" >> $filename
