@@ -14,6 +14,12 @@ unpack() {
   echo "compress_flag=$compress_flag" >> $filename
   echo "executable_run=$2" >> $filename
   echo "tmp_parent=/tmp" >> $filename
+  echo 'if [ "$1" = "--packelf-extract" ] ; then' >> $filename
+  echo '  mkdir -p packelf-files' >> $filename 
+  echo "  echo \"Extracting to 'packelf-files'\"" >> $filename 
+  echo "  sed '1,/^#__END__\$/d' \"\$0\" | tar \$compress_flag -x -C packelf-files" >> $filename
+  echo "  exit 0" >> $filename 
+  echo "fi" >> $filename 
   echo 'mkdir -p "$tmp_parent"' >> $filename
   echo 'unpack_dir=$(mktemp -d -p "$tmp_parent" || echo "$tmp_parent")' >> $filename
   echo "sed '1,/^#__END__\$/d' \"\$0\" | tar \$compress_flag -x -C \"\$unpack_dir\"" >> $filename
