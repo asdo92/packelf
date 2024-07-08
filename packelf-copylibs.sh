@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #set -o pipefail # bash extension
-set -e
+#set -e
 
 if [ -z "${1}" ] ; then
   echo "$0 <ELF_SRC_PATH> <PATH_TO_COPY_LIBRARIES>"

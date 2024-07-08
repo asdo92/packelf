@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #set -o pipefail # bash extension
-set -e
+#set -e
 
 # These vars will be modified automatically with sed
 compress_flag=-z
@@ -9,7 +9,7 @@ unpack() {
   filename=$1
   echo "#!/usr/bin/env sh" > $filename
   echo "#set -o pipefail # bash extension" >> $filename
-  echo "set -e" >> $filename
+  echo "#set -e" >> $filename
   echo "" >> $filename
   echo "compress_flag=$compress_flag" >> $filename
   echo "executable_run=$2" >> $filename
