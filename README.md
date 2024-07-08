@@ -1,4 +1,4 @@
-`packelf` was inspired by [the idea of Klaus D](https://askubuntu.com/a/546305). It is used to pack a ELF program and its dependent libraries into a single executable file.
+`packelf` was based on then [oufm](https://github.com/oufm/packelf) script, but is simpler and has extra tools. It is used to pack a ELF program and its dependent libraries into a single executable file.
 
 
 ## Usage packelf:
