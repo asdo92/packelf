@@ -2,6 +2,9 @@
 #set -o pipefail # bash extension
 #set -e
 
+# Pack elf binary and it's dependencies into standalone executable
+# License: GPLv2.0
+
 if [ -z "${1}" ] ; then
   echo "$0 <ELF_SRC_PATH> <PATH_TO_COPY_LIBRARIES>"
   exit 0

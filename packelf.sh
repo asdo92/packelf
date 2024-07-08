@@ -2,6 +2,9 @@
 #set -o pipefail # bash extension
 #set -e
 
+# Pack elf binary and it's dependencies into standalone executable
+# # License: GPLv2.0
+
 # These vars will be modified automatically with sed
 compress_flag=-z
 
@@ -45,7 +48,7 @@ pack() {
   cd $folder
   chmod 777 -R * 2> /dev/null
   tar $compress_flag -c -f $temp_file *
-  cd ${current_dir}
+  cd $current_dir
   cat $temp_file >> $filename
   rm -rf $temp_file
   echo "Created successfully"
