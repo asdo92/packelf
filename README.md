@@ -10,7 +10,7 @@ Usage: ./packelf.sh <ELF_SRC_PATH> <DST_PATH_FILENAME>
 Example:
 
 ```
-# ./packelf.sh /usr/bin/mpv mpv-x86_64.AppRun
+$ ./packelf.sh /usr/bin/mpv mpv-x86_64.AppRun
 ```
 
 Note: Every time the packed program is executed, an internal unpacking operation is performed automatically, which results in a slower startup of the program.
@@ -20,10 +20,10 @@ Note: Every time the packed program is executed, an internal unpacking operation
 You can extract the files of a created package without executing it with the following command:
 
 ```                                                                                                                                                                                                                  
-# ./<package> --packelf-extract                                                                                                                                                                        
+$ ./<package> --packelf-extract                                                                                                                                                                        
 ```  
 
-## Usage Extra Tools:
+## Usage packelf-copylibs:
 
 ```                                                                                                                                                                                                               
 Usage: ./packelf-copylibs.sh <ELF_SRC_PATH> <PATH_TO_COPY_LIBRARIES>
@@ -32,8 +32,10 @@ Usage: ./packelf-copylibs.sh <ELF_SRC_PATH> <PATH_TO_COPY_LIBRARIES>
 Example:
 
 ```
-# ./packelf-copylibs.sh /usr/bin/mpv /opt/mpv-libs/
+$ ./packelf-copylibs.sh /usr/bin/mpv /opt/mpv-libs/
 ```
+
+## Usage packelf-folder:
 
 ``` 
 Usage: ./packelf-folder.sh <FOLDER> <FILENAME> <EXECUTABLE_RUN>
@@ -42,7 +44,7 @@ Usage: ./packelf-folder.sh <FOLDER> <FILENAME> <EXECUTABLE_RUN>
 Example:
 
 ``` 
-# ./packelf-folder.sh /opt/mpv-package mpv-x86_64.AppRun AppRun
+$ ./packelf-folder.sh /opt/mpv-package mpv-x86_64.AppRun AppRun
 ```
 
 ## Dependencies
