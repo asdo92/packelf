@@ -3,7 +3,7 @@
 #set -e
 
 # Pack elf binary and it's dependencies into standalone executable
-# # License: GPLv2.0
+# License: GPLv2.0
 
 # These vars will be modified automatically with sed
 compress_flag=-z
