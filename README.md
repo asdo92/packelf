@@ -25,12 +25,24 @@ You can extract the files of a created package without executing it with the fol
 
 ## Usage Extra Tools:
 
-```                                                                                                                                                                                                                  
+```                                                                                                                                                                                                               
 Usage: ./packelf-copylibs.sh <ELF_SRC_PATH> <PATH_TO_COPY_LIBRARIES>
 ```
 
-```                                                                                                                                                                                                                  
+Example:
+
+```
+# ./packelf-copylibs.sh /usr/bin/mpv /opt/mpv-libs/
+```
+
+``` 
 Usage: ./packelf-folder.sh <FOLDER> <FILENAME> <EXECUTABLE_RUN>
+```
+
+Example:
+
+``` 
+# ./packelf-folder.sh /opt/mpv-package mpv-x86_64.AppRun AppRun
 ```
 
 ## Dependencies
