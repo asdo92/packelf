@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+# Example script when packaging folders with executables
+# In this case the binary "ffmpeg" is executed.
+
+$(dirname $0)/ld-linux-x86-64.so.2 --library-path $(dirname $0) $(dirname $0)/ffmpeg "$@"
