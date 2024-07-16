@@ -55,7 +55,7 @@ pack() {
 }
 
 help() {
-  echo "$0 <ELF_SRC_PATH> <DST_PATH_FILENAME>"
+  echo "$0 <ELF_SRC_PATH> <FILENAME_DST_PATH>"
   exit 0
 }
 
