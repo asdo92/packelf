@@ -4,7 +4,7 @@
 ## Usage packelf:
 
 ```
-Usage: ./packelf.sh <ELF_SRC_PATH> <DST_PATH_FILENAME>
+Usage: ./packelf.sh <ELF_SRC_PATH> <FILENAME_DST_PATH>
 ```
 
 Example:
