@@ -16,7 +16,8 @@ unpack() {
   echo "" >> $filename
   echo "compress_flag=$compress_flag" >> $filename
   echo "executable_run=$2" >> $filename
-  echo "tmp_parent=/tmp" >> $filename
+  echo "executable_dir=$program" >> $filename
+  echo "tmp_parent=~/.cache" >> $filename
   echo 'if [ "$1" = "--packelf-extract" ] ; then' >> $filename
   echo '  mkdir -p packelf-files' >> $filename 
   echo "  echo \"Extracting to 'packelf-files'\"" >> $filename 
@@ -24,11 +25,15 @@ unpack() {
   echo "  exit 0" >> $filename 
   echo "fi" >> $filename 
   echo 'mkdir -p "$tmp_parent"' >> $filename
-  echo 'unpack_dir=$(mktemp -d -p "$tmp_parent" || echo "$tmp_parent")' >> $filename
+  echo 'unpack_dir="$tmp_parent/$executable_dir"' >> $filename
+  echo 'mkdir -p $unpack_dir' >> $filename
   echo "sed '1,/^#__END__\$/d' \"\$0\" | tar \$compress_flag -x -C \"\$unpack_dir\"" >> $filename
   echo "chmod 777 -R \"\$unpack_dir\"/* 2> /dev/null" >> $filename
   echo '"$unpack_dir/$executable_run" "$@"' >> $filename
-  echo "rm -rf \$unpack_dir" >> $filename
+  echo 'active_process=$(ps -ef | grep "$unpack_dir/$executable_run" | grep -v grep)' >> $filename
+  echo 'if [ -z $active_process ] ; then' >> $filename
+  echo "  rm -rf \$unpack_dir" >> $filename
+  echo 'fi' >> $filename
   echo "exit 0" >> $filename
   echo "#__END__" >> $filename
 }
